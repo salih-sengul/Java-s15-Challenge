@@ -1,3 +1,4 @@
+import com.workintech.book.Book;
 import com.workintech.library.Library;
 import com.workintech.user.Admin;
 import com.workintech.user.Athentication;
@@ -18,6 +19,7 @@ public class Main {
 
         String keyboard;
         Admin admin = new Admin(1L,"ali","123");
+
         Library.getUsers().put(admin.getId(),admin);
         String session="";
 
@@ -44,15 +46,52 @@ public class Main {
             if(auth.equals("user logged in")){
                 break;
             }
-
         }
 
         System.out.println(session);
 
+        if(session.equalsIgnoreCase("admin")){
+            helpMenuWithAdmin();
+        }
+        helpMenu();
+
+        /*
+                    addBook : Sisteme kitap ekle.
+                - findBookAd : İsim ile kitap ara.
+                - findBookI : ID ile kitap ara.
+                - findBookY : Yazar adı ile kitap ara.
+                - updateBook : Kitap bilgilerini güncelle.
+                - deleteBook : Sistemden kitap sil.
+                - listCat : Kategorideki tüm kitapları listele.
+                - listAut : Yazarın tüm kitaplarını listele.
+                - lendBook : Kullanıcıya kitap ver.
+                - returnBook : Kullanıcıdan kitap al.
+                - help : komutları listele.
+                - exit : Admin komutlarından çık.
+        * */
+        while(!(keyboard = scan.nextLine().toLowerCase(Locale.ROOT)).equals("exit")){
+
+            switch (keyboard){
+                case "admin" -> admin(session);
+                case "addBook" -> addBook();
+                case "help" -> {
+                    if(session.equalsIgnoreCase("admin")){
+                        helpMenuWithAdmin();
+                    }
+                    helpMenu();
+                }
+
+            }
+
+        }
+    }
+
+    private static void admin(String session) {
         if(session.equals("Admin")){
             System.out.println("Admin metodlarına girmek istiyor musunuz? evet is (devam) yazın.");
             if(scan.nextLine().trim().equals("devam")){
                 adminHelpMenu();
+                String keyboard;
                 while (!(keyboard = scan.nextLine()).equals("exit")){
                     switch(keyboard){
                         case "createAdmin"-> createAdmin();
@@ -67,14 +106,6 @@ public class Main {
             }
 
         }
-
-        /*while(!(keyboard = scan.nextLine().toLowerCase(Locale.ROOT)).equals("exit")){
-
-            switch (keyboard){
-                case
-            }
-
-        }*/
     }
 
     public static void adminHelpMenu(){
@@ -88,6 +119,29 @@ public class Main {
                 """;
             out.println(help);
 
+    }
+
+    public static void helpMenuWithAdmin(){
+        String help = "- admin : Admin komutlarına gir";
+        out.println(help);
+    }
+
+    public static void helpMenu(){
+        String help = """
+                - addBook : Sisteme kitap ekle.
+                - findBookAd : İsim ile kitap ara.
+                - findBookI : ID ile kitap ara.
+                - findBookY : Yazar adı ile kitap ara.
+                - updateBook : Kitap bilgilerini güncelle.
+                - deleteBook : Sistemden kitap sil.
+                - listCat : Kategorideki tüm kitapları listele.
+                - listAut : Yazarın tüm kitaplarını listele.
+                - lendBook : Kullanıcıya kitap ver.
+                - returnBook : Kullanıcıdan kitap al.
+                - help : komutları listele.
+                - exit : Admin komutlarından çık.
+                """;
+        out.println(help);
     }
 
     public static void createAdmin(){
@@ -150,6 +204,22 @@ public class Main {
         }
         System.out.println(librarianName+" kullanıcı adlı kullanıcı bulunamadı!");
         System.out.println("Map'te kütüphaneci kullanıcı yok");
+    }
+
+    public static void addBook(){
+        System.out.println("kitap adı girin: ");
+        String bookName = scan.nextLine().trim();
+
+        System.out.println("kitap kategorisi girin: ");
+        String bookCat = scan.nextLine().trim();
+
+        System.out.println("kitap fiyatı girin: ");
+        String bookPrc = scan.nextLine().trim();
+
+        System.out.println("kitap yazar adı girin: ");
+        String bookAut = scan.nextLine().trim();
+
+        Book book   = new Book(Library.getId(Library.getBooks()),bookName,)
     }
 
 }
