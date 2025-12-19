@@ -1,13 +1,10 @@
 package com.workintech.reader;
-
-
 import com.workintech.book.Book;
 import com.workintech.library.Invoice;
-
 import java.util.HashSet;
 import java.util.Set;
 
-public class Reader{
+public class Reader {
     private Long id;
     private String name;
     private String contactInfo;

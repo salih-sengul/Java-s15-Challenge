@@ -1,6 +1,6 @@
 package com.workintech.book.category;
 
-public class KidsBook extends Category{
+public class KidsBook extends Category {
     private String ageRange;
 
     public KidsBook(Long id, String name, String ageRange) {
