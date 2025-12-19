@@ -382,6 +382,8 @@ public class Main {
         }
     }
 
+
+
     public static void changeCategory(Book book, String kat){
 
         if(book.getCategory().equals("KidsBook")){
