@@ -1,4 +1,8 @@
 import com.workintech.book.Book;
+import com.workintech.book.category.Category;
+import com.workintech.book.category.KidsBook;
+import com.workintech.book.category.Novel;
+import com.workintech.book.category.Textbook;
 import com.workintech.library.Library;
 import com.workintech.user.Admin;
 import com.workintech.user.Athentication;
@@ -11,13 +15,20 @@ import static java.lang.System.out;
 
 public class Main {
     static Scanner scan = new Scanner(System.in);
+    static String keyboard;
     static String sessionName;
+    static Category kidsBook = new KidsBook(1L,"Kids Book","2-3");
+    static Category novel = new Novel(2L,"Novel","Horror");
+    static Category textBook = new Textbook(3L,"Text Book","Math");
+
 
 
     public static void main(String[] args) {
-        Scanner scan = new Scanner(System.in);
+        Library.getCategories().put(1L,kidsBook);
+        Library.getCategories().put(2L,novel);
+        Library.getCategories().put(3L,textBook);
 
-        String keyboard;
+
         Admin admin = new Admin(1L,"ali","123");
 
         Library.getUsers().put(admin.getId(),admin);
@@ -69,17 +80,22 @@ public class Main {
                 - help : komutları listele.
                 - exit : Admin komutlarından çık.
         * */
-        while(!(keyboard = scan.nextLine().toLowerCase(Locale.ROOT)).equals("exit")){
+        while(!(keyboard = scan.nextLine()).equals("exit")){
 
             switch (keyboard){
                 case "admin" -> admin(session);
                 case "addBook" -> addBook();
+                case "findBookAd" -> findBookAd();
+                case "findBookI"-> findBookI();
+                case "findBookY" -> findBookY();
+                case "updateBook" -> updatebook();
                 case "help" -> {
                     if(session.equalsIgnoreCase("admin")){
                         helpMenuWithAdmin();
                     }
                     helpMenu();
                 }
+                default -> out.println("Bilinmeyen komut. Komutları görmek için \"help\" yazın");
 
             }
 
@@ -91,7 +107,6 @@ public class Main {
             System.out.println("Admin metodlarına girmek istiyor musunuz? evet is (devam) yazın.");
             if(scan.nextLine().trim().equals("devam")){
                 adminHelpMenu();
-                String keyboard;
                 while (!(keyboard = scan.nextLine()).equals("exit")){
                     switch(keyboard){
                         case "createAdmin"-> createAdmin();
@@ -188,6 +203,7 @@ public class Main {
         Library.getUsers().put(librarian.getId(),librarian);
     }
 
+    //kütüphaneci silme
     public  static void deleteLibrarian(){
 
         System.out.println("Silmek istediğiniz kütüphaneci kullanıcı adı girin: ");
@@ -206,20 +222,185 @@ public class Main {
         System.out.println("Map'te kütüphaneci kullanıcı yok");
     }
 
+    //kitap oluşturma ve kütüphaneye ekleme
     public static void addBook(){
         System.out.println("kitap adı girin: ");
         String bookName = scan.nextLine().trim();
 
         System.out.println("kitap kategorisi girin: ");
-        String bookCat = scan.nextLine().trim();
+        String bookCat = selectCats();
 
-        System.out.println("kitap fiyatı girin: ");
-        String bookPrc = scan.nextLine().trim();
+        System.out.println("kitap fiyatı girin(sadece sayı): ");
+        Double bookPrc = scan.nextDouble();
+
+        scan.nextLine();
 
         System.out.println("kitap yazar adı girin: ");
         String bookAut = scan.nextLine().trim();
 
-        Book book   = new Book(Library.getId(Library.getBooks()),bookName,)
+        Book book  = new Book(Library.getId(Library.getBooks()),bookName,bookCat,bookPrc,bookAut);
+
+        //kütüphaneye ekleme
+        out.println(Library.addBook(book));
+
+        //kategoriye ekleme
+        if(bookCat.equals("KidsBook")){
+            out.println(kidsBook.addBook(book));
+        } else if (bookCat.equals("Novel")) {
+            out.println(novel.addBook(book));
+        }else {
+            out.println(textBook.addBook(book));
+        }
+    }
+
+    //hazır olan kategorileri kullanıcıdan alma
+    public static String selectCats(){
+        String keyboard;
+        catMenu();
+        while(true){
+            keyboard = scan.nextLine();
+            switch (keyboard){
+                case "KidsBook" -> {
+                    return "KidsBook";
+                }
+                case "Novel" -> {
+                    return "Novel";
+                }
+                case "TextBook" ->{
+                    return "Textbook";
+                }
+                case "list" -> catMenu();
+                default -> out.println("Bilinmeyen komut. list yazıp kategori listesini açın");
+
+            }
+
+        }
+    }
+
+    //kategori listesi yazdırma
+    public static void catMenu(){
+        String help = """
+                - KidsBook : çocuk kitabı kategorisine seç.
+                - Novel: Roman kategorisini seç.
+                - TextBook : Çalışma kitabı kategorisini seç.
+                - list : kategori listesini açın.
+                """;
+        out.println(help);
+    }
+
+    public static void findBookAd(){
+        System.out.println("kitap adı girin: ");
+        String bookName = scan.nextLine().trim();
+
+
+        if(Library.findBook(bookName)!=null){
+            out.println(Library.findBook(bookName).getName());
+        }else {
+            out.println("Böyle bir kitap yok");
+        }
+    }
+
+    public static void findBookI(){
+        System.out.println("kitap id'si girin: ");
+        Long bookId = scan.nextLong();
+        scan.nextLine();
+
+        if(Library.findBook(bookId)!=null){
+            out.println(Library.findBook(bookId).getName());
+        }else {
+            out.println("Böyle bir kitap yok");
+        }
+    }
+
+    public static void findBookY(){
+        System.out.println("Yazar adı girin: ");
+        String authName = scan.nextLine().trim();
+
+        if(Library.findBookAuthor(authName)!=null){
+            out.println(Library.findBookAuthor(authName).getName());
+        }else {
+            out.println("Böyle bir kitap yok");
+        }
+    }
+
+    public static void updatebook() {
+        System.out.println("kitap adı girin: ");
+        String bookName = scan.nextLine().trim();
+
+        Book book;
+        if (Library.findBook(bookName) != null) {
+            book = Library.findBook(bookName);
+        } else {
+            out.println("Böyle bir kitap yok");
+            return;
+        }
+
+        bookAlanSec(book);
+
+        System.out.println("kitap adı girin: ");
+        String bookName = scan.nextLine().trim();
+
+        System.out.println("kitap kategorisi girin: ");
+        String bookCat = selectCats();
+
+        System.out.println("kitap fiyatı girin(sadece sayı): ");
+        Double bookPrc = scan.nextDouble();
+
+        scan.nextLine();
+
+        System.out.println("kitap yazar adı girin: ");
+        String bookAut = scan.nextLine().trim();
+
+    }
+
+    public static void bookAlanSec(Book book){
+        keyboard = scan.nextLine().trim();
+
+        while (!Objects.equals(keyboard, "exit")) {
+            switch (keyboard){
+                case "ad" -> {
+                    out.println("Yeni isim girin: ");
+                    book.setName(scan.nextLine());
+                }
+                case "kategori" -> {
+                   String kat = selectCats();
+                   changeCategory(book, kat);
+                }
+                case "fiyat" ->{
+                    System.out.println("kitap fiyatı girin(sadece sayı): ");
+                    Double bookPrc = scan.nextDouble();
+                    scan.nextLine();
+                    book.setPrice(bookPrc);
+                }
+                case "yazay" ->{
+                    System.out.println("kitap yazar adı girin: ");
+                    String bookAut = scan.nextLine().trim();
+                    book.setAuthor(bookAut);
+                }
+                default -> out.println("Bilinmeyen komut. help yazıp komutları listeleyin");
+            }
+        }
+    }
+
+    public static void changeCategory(Book book, String kat){
+
+        if(book.getCategory().equals("KidsBook")){
+            out.println(kidsBook.deleteBook(book));
+        } else if (book.getCategory().equals("Novel")) {
+            out.println(novel.deleteBook(book));
+        }else {
+            out.println(textBook.deleteBook(book));
+        }
+
+        if(kat.equals("KidsBook")){
+            out.println(kidsBook.addBook(book));
+        } else if (kat.equals("Novel")) {
+            out.println(novel.addBook(book));
+        }else {
+            out.println(textBook.addBook(book));
+        }
+
+
     }
 
 }

@@ -5,16 +5,21 @@ import com.workintech.library.Invoice;
 
 import java.util.Objects;
 
-public class Book{
+public class Book implements Comparable<Book>{
     private Long id;
     private String name;
-    private Category category;
+    private String category;
     private Boolean isAvailable;
     private Double price;
     private String author;
     private Invoice invoice;
 
-    public Book(Long id, String name, Category category, Double price, String author) {
+    public Book(Long id, String name, Double price, String author){
+
+        this(id,name,"",price,author);
+    }
+
+    public Book(Long id, String name, String category, Double price, String author) {
         this.id = id;
         this.name = name;
         this.category = category;
@@ -39,11 +44,11 @@ public class Book{
         this.name = name;
     }
 
-    public Category getCategory() {
+    public String getCategory() {
         return category;
     }
 
-    public void setCategory(Category category) {
+    public void setCategory(String category) {
         this.category = category;
     }
 
@@ -100,5 +105,10 @@ public class Book{
     @Override
     public int hashCode() {
         return Objects.hashCode(id);
+    }
+
+    @Override
+    public int compareTo(Book book) {
+        return name.compareTo(book.name);
     }
 }
