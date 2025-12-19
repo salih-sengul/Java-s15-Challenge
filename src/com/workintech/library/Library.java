@@ -11,22 +11,22 @@ import java.util.*;
 
 public class Library {
 
-    private static Map<Long,Book> books = new HashMap<>();
-    private static Map<Long,Reader> readers = new HashMap<>();
+    private static Map<Long, Book> books = new HashMap<>();
+    private static Map<Long, Reader> readers = new HashMap<>();
     private static Map<Long, User> users = new HashMap<>();
-    private static Map<Long, Invoice> invoices= new HashMap<>();
-    private static Map<Long, Category> categories= new HashMap<>();
+    private static Map<Long, Invoice> invoices = new HashMap<>();
+    private static Map<Long, Category> categories = new HashMap<>();
 
     private static Library instance = new Library();
 
-    private Library(){
-        Admin admin = new Admin(1L,"admin","123");
-        Librarian librarian = new Librarian(2L,"veli","123");
-        users.put(2L,librarian);
-        users.put(admin.getId(),admin);
+    private Library() {
+        Admin admin = new Admin(1L, "admin", "123");
+        Librarian librarian = new Librarian(2L, "veli", "123");
+        users.put(2L, librarian);
+        users.put(admin.getId(), admin);
     }
 
-    public static Library getInstance(){
+    public static Library getInstance() {
         return instance;
     }
 
@@ -53,52 +53,52 @@ public class Library {
     }
 
 
-    public static Book findBook(Long id){
+    public static Book findBook(Long id) {
         return books.get(id);
     }
 
-    public static Book findBook(String name){
-        for(Map.Entry<Long,Book> entry: books.entrySet()){
-            if(entry.getValue().getName().equals(name)){
+    public static Book findBook(String name) {
+        for (Map.Entry<Long, Book> entry : books.entrySet()) {
+            if (entry.getValue().getName().equals(name)) {
                 return entry.getValue();
             }
         }
         return null;
     }
 
-    public static Book findBookAuthor(String authorName){
-        for(Map.Entry<Long,Book> entry: books.entrySet()){
-            if(entry.getValue().getName().equals(authorName)){
+    public static Book findBookAuthor(String authorName) {
+        for (Map.Entry<Long, Book> entry : books.entrySet()) {
+            if (entry.getValue().getName().equals(authorName)) {
                 return entry.getValue();
             }
         }
         return null;
     }
 
-    public static String lendBook(Book book, Reader reader){
+    public static String lendBook(Book book, Reader reader) {
 
-        if(reader.getBooks().add(book) && book.getAvailable()){
+        if (reader.getBooks().add(book) && book.getAvailable()) {
             book.setAvailable(false);
 
-           Invoice invoice = new Invoice (book.getId(),book.getId(), book.getPrice());
-           invoices.put(invoice.getId(),invoice);
-           book.setInvoice(invoice);
-           reader.getInvoices().add(invoice);
+            Invoice invoice = new Invoice(book.getId(), book.getId(), book.getPrice());
+            invoices.put(invoice.getId(), invoice);
+            book.setInvoice(invoice);
+            reader.getInvoices().add(invoice);
 
             return "book added on the reader";
-        }else{
+        } else {
             return "book already on the reader";
         }
     }
 
-    public static String returnBook(Book book, Reader reader){
-        if(reader.getBooks().remove(book)){
+    public static String returnBook(Book book, Reader reader) {
+        if (reader.getBooks().remove(book)) {
             book.setAvailable(true);
             book.getInvoice().setEndDate(new Date());
             book.setInvoice(null);
 
             return "book returned";
-        }else{
+        } else {
             return "user dosent have this book";
         }
     }
@@ -109,39 +109,39 @@ public class Library {
     Map<Long, Invoice>
     Map<Long, Category>*/
 
-    public static long getId(Map<Long,?> map){
-         if(map.isEmpty()) return 1L;
-         return Collections.max(map.keySet())+1;
+    public static long getId(Map<Long, ?> map) {
+        if (map.isEmpty()) return 1L;
+        return Collections.max(map.keySet()) + 1;
     }
 
-    public static List<Book> listByCategory(Category category){
-       return category.getBooks().stream().toList();
+    public static List<Book> listByCategory(Category category) {
+        return category.listBookAsc().stream().toList();
     }
 
-    public static List<Book> listByAuthor(String authorName){
+    public static List<Book> listByAuthor(String authorName) {
         List<Book> bookList = new ArrayList<>();
 
-        for(Map.Entry<Long,Book> entry: books.entrySet()){
-            if(entry.getValue().getAuthor().equals(authorName)){
+        for (Map.Entry<Long, Book> entry : books.entrySet()) {
+            if (entry.getValue().getAuthor().equals(authorName)) {
                 bookList.add(entry.getValue());
             }
         }
         return bookList;
     }
 
-    public static String addBook(Book book){
-        if(books.put(getId(books),book)==null){
+    public static String addBook(Book book) {
+        if (books.put(getId(books), book) == null) {
             return "Book added successfully";
-        }else{
+        } else {
             return "id is occupied";
         }
     }
 
-    public static String deleteBook(Book book){
-        if(books.containsKey(book.getId())){
+    public static String deleteBook(Book book) {
+        if (books.containsKey(book.getId())) {
             books.remove(book.getId());
             return "book removed!";
-        }else{
+        } else {
             return "book was not in the system";
         }
     }
@@ -155,14 +155,12 @@ public class Library {
         }
     }*/
 
-    public static void listUsers(){
-        for(Map.Entry<Long, User> entry: users.entrySet()){
-            System.out.println("id: " + entry.getKey()+" | "+entry.getValue());
+    public static void listUsers() {
+        for (Map.Entry<Long, User> entry : users.entrySet()) {
+            System.out.println("id: " + entry.getKey() + " | " + entry.getValue());
 
         }
     }
-
-
 
 
 }
