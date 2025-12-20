@@ -46,33 +46,6 @@ public abstract class Category {
         this.numberOfBooks = books.size();
     }
 
-    public String addBook(Book book) {
-        if (books.add(book)) {
-
-            return "Book added to " + this.getClass().getSimpleName() + " category";
-        } else {
-            return "Book was already in catergory";
-        }
-    }
-
-    public String deleteBook(Book book) {
-        if (books.remove(book)) {
-            return "Book deleted from category:  " + this.getClass().getSimpleName();
-        } else {
-            return "There was no book";
-        }
-    }
-
-    public TreeSet<Book> listBookAsc() {
-        return new TreeSet<>(this.books);
-    }
-
-    public TreeSet<Book> listBookDesc() {
-        TreeSet<Book> booksDesc = new TreeSet<>(Collections.reverseOrder());
-        booksDesc.addAll(this.books);
-        return booksDesc;
-    }
-
     @Override
     public String toString() {
         return name;

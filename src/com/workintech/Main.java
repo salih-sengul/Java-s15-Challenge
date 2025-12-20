@@ -2,59 +2,53 @@ package com.workintech;
 
 import com.workintech.book.Book;
 import com.workintech.book.category.Category;
-import com.workintech.book.category.KidsBook;
-import com.workintech.book.category.Novel;
-import com.workintech.book.category.Textbook;
-import com.workintech.library.Library;
+import com.workintech.manager.*;
 import com.workintech.reader.Reader;
+import com.workintech.ui.ConsoleUI;
 import com.workintech.user.Admin;
-import com.workintech.user.Athentication;
 import com.workintech.user.Librarian;
 import com.workintech.user.User;
+import com.workintech.util.IdGenerator;
 
 import java.util.*;
 
 import static java.lang.System.out;
 
 public class Main {
-    static Scanner scan = new Scanner(System.in);
+    static ConsoleUI ui = new ConsoleUI();
     static String keyboard;
     static String sessionName;
     static String noBook = "Böyle bir kitap yok";
     static String adminStr = "admin";
-    static Category kidsBook = new KidsBook(1L, "Kids Book", "2-3");
-    static Category novel = new Novel(2L, "Novel", "Horror");
-    static Category textBook = new Textbook(3L, "Text Book", "Math");
-    static Book kitap = new Book(1L, "al", kidsBook, 10d, "yaz");
+    static Book kitap = new Book(1L, "al", ui.getKidsBook(), 10d, "yaz");
 
 
     public static void main(String[] args) {
-        Library.getCategories().put(1L, kidsBook);
-        Library.getCategories().put(2L, novel);
-        Library.getCategories().put(3L, textBook);
-        kitap.getCategory().addBook(kitap);
-        Library.addBook(kitap);
+        CategoryManager.getInstance().getCategories().put(1L, ui.getKidsBook());
+        CategoryManager.getInstance().getCategories().put(2L, ui.getNovel());
+        CategoryManager.getInstance().getCategories().put(3L, ui.getTextBook());
+        CategoryManager.getInstance().addBookToCategory(kitap, kitap.getCategory());
+        BookManager.getInstance().addBook(kitap);
 
         Admin admin = new Admin(1L, "ali", "123");
 
-        Library.getUsers().put(admin.getId(), admin);
+        UserManager.getInstance().getUsers().put(admin.getId(), admin);
         String session = "";
 
         String auth;
         while (true) {
             System.out.println("kullanıcı Adı girin:");
-            String username = scan.nextLine();
+            String username = ui.getScanner().nextLine();
             sessionName = username;
 
             System.out.println("Şifre girin");
-            String password = scan.nextLine();
+            String password = ui.getScanner().nextLine();
 
-            Athentication athentication = new Athentication(username, password);
-            auth = athentication.checkNamePassword(username, password);
+            auth = AuthenticationManager.getInstance().authenticate(username, password);
 
             System.out.println(auth);
 
-            for (Map.Entry<Long, User> entry : Library.getUsers().entrySet()) {
+            for (Map.Entry<Long, User> entry : UserManager.getInstance().getUsers().entrySet()) {
                 if (entry.getValue().getUserName().equals(username)) {
                     session = (entry.getValue() instanceof Admin) ? ("Admin") : ("Librarian");
                 }
@@ -68,11 +62,11 @@ public class Main {
         System.out.println(session);
 
         if (session.equalsIgnoreCase(adminStr)) {
-            helpMenuWithAdmin();
+            ui.helpMenuWithAdmin();
         }
 
-        helpMenu();
-        while (!(keyboard = scan.nextLine()).equals("exit")) {
+        ui.helpMenu();
+        while (!(keyboard = ui.getScanner().nextLine()).equals("exit")) {
 
             switch (keyboard) {
                 case "admin" -> admin(session);
@@ -88,9 +82,9 @@ public class Main {
                 case "returnBook" -> returnBook();
                 case "help" -> {
                     if (session.equalsIgnoreCase(adminStr)) {
-                        helpMenuWithAdmin();
+                        ui.helpMenuWithAdmin();
                     }
-                    helpMenu();
+                    ui.helpMenu();
                 }
                 default -> out.println("Bilinmeyen komut. Komutları görmek için \"help\" yazın");
 
@@ -99,37 +93,19 @@ public class Main {
         }
     }
 
-    public static void helpMenu() {
-        String help = """
-                - addBook : Sisteme kitap ekle.
-                - findBookAd : İsim ile kitap ara.
-                - findBookI : ID ile kitap ara.
-                - findBookY : Yazar adı ile kitap ara.
-                - updateBook : Kitap bilgilerini güncelle.
-                - deleteBook : Sistemden kitap sil.
-                - listCat : Kategorideki tüm kitapları listele.
-                - listAut : Yazarın tüm kitaplarını listele.
-                - lendBook : Kullanıcıya kitap ver.
-                - returnBook : Kullanıcıdan kitap al.
-                - help : komutları listele.
-                - exit : Programdan çık.
-                """;
-        out.println(help);
-    }
-
     private static void admin(String session) {
         if (session.equals("Admin")) {
             System.out.println("Admin metodlarına girmek istiyor musunuz? evet is (devam) yazın.");
-            if (scan.nextLine().trim().equals("devam")) {
-                adminHelpMenu();
-                while (!(keyboard = scan.nextLine()).equals("exit")) {
+            if (ui.getScanner().nextLine().trim().equals("devam")) {
+                ui.adminHelpMenu();
+                while (!(keyboard = ui.getScanner().nextLine()).equals("exit")) {
                     switch (keyboard) {
                         case "createAdmin" -> createAdmin();
                         case "deleteAdmin" -> deleteAdmin();
                         case "createLib" -> createLibrarian();
                         case "deleteLib" -> deleteLibrarian();
-                        case "list" -> Library.listUsers();
-                        case "help" -> adminHelpMenu();
+                        case "list" -> UserManager.getInstance().listUsers();
+                        case "help" -> ui.adminHelpMenu();
                         default -> out.println("Bilinmeyen komut. help yazıp yardımcı menüyü açın");
                     }
                 }
@@ -138,46 +114,28 @@ public class Main {
         }
     }
 
-    public static void adminHelpMenu() {
-        String help = """
-                - createAdmin : Admin kullanıcısı ekle
-                - deleteAdmin : Admin kullanıcısı sil
-                - createLib : Kütüphaneci kullanıcısı ekle
-                - deleteLib : Kütüphaneci kullanıcısı sil
-                - list : kullanıcıları listele
-                - exit : Admin komutlarından çık.
-                """;
-        out.println(help);
-
-    }
-
-    public static void helpMenuWithAdmin() {
-        String help = "- admin : Admin komutlarına gir";
-        out.println(help);
-    }
-
     public static void createAdmin() {
         System.out.println("Kullanıcı adı giriniz.");
-        String username = scan.nextLine().trim();
+        String username = ui.getScanner().nextLine().trim();
 
         System.out.println("Şifre giriniz");
-        String password = scan.nextLine().trim();
+        String password = ui.getScanner().nextLine().trim();
 
-        Admin admin = new Admin(Library.getId(Library.getUsers()), username, password);
+        Admin admin = new Admin(IdGenerator.generateId(UserManager.getInstance().getUsers()), username, password);
         out.println(admin);
-        out.println(admin.createAdmin(admin));
+        out.println(UserManager.getInstance().createAdmin(admin));
     }
 
     public static void deleteAdmin() {
         System.out.println("Silmek istediğiniz admin kullanıcı adı girin: ");
-        String adminName = scan.nextLine().trim();
+        String adminName = ui.getScanner().nextLine().trim();
         if (sessionName.equals(adminName)) {
             out.println("Kendinizi silemezsiniz :D");
             return;
         }
-        for (Map.Entry<Long, User> entry : Library.getUsers().entrySet()) {
+        for (Map.Entry<Long, User> entry : UserManager.getInstance().getUsers().entrySet()) {
             if (entry.getValue() instanceof Admin && entry.getValue().getUserName().equals(adminName)) {
-                    Library.getUsers().remove(entry.getValue().getId());
+                    UserManager.getInstance().getUsers().remove(entry.getValue().getId());
                     System.out.println(adminName + " Kullanıcı adlı admin silindi.");
                     return;
                 }
@@ -189,25 +147,25 @@ public class Main {
 
     public static void createLibrarian() {
         System.out.println("Kütüphaneci kullanıcı adı girin: ");
-        String librarianName = scan.nextLine().trim();
+        String librarianName = ui.getScanner().nextLine().trim();
 
         System.out.println("Kütüphaneci şifre girin: ");
-        String librarianPass = scan.nextLine().trim();
+        String librarianPass = ui.getScanner().nextLine().trim();
 
-        Librarian librarian = new Librarian(Library.getId(Library.getUsers()), librarianName, librarianPass);
+        Librarian librarian = new Librarian(IdGenerator.generateId(UserManager.getInstance().getUsers()), librarianName, librarianPass);
         out.println(librarian);
-        Library.getUsers().put(librarian.getId(), librarian);
+        out.println(UserManager.getInstance().createLibrarian(librarian));
     }
 
     //kütüphaneci silme
     public static void deleteLibrarian() {
 
         System.out.println("Silmek istediğiniz kütüphaneci kullanıcı adı girin: ");
-        String librarianName = scan.nextLine().trim();
+        String librarianName = ui.getScanner().nextLine().trim();
 
-        for (Map.Entry<Long, User> entry : Library.getUsers().entrySet()) {
+        for (Map.Entry<Long, User> entry : UserManager.getInstance().getUsers().entrySet()) {
             if (entry.getValue() instanceof Librarian && entry.getValue().getUserName().equals(librarianName)) {
-                    Library.getUsers().remove(entry.getValue().getId());
+                    UserManager.getInstance().getUsers().remove(entry.getValue().getId());
                     System.out.println(librarianName + " Kullanıcı adlı kütüphaneci silindi.");
                     return;
                 }
@@ -220,67 +178,32 @@ public class Main {
     //kitap oluşturma ve kütüphaneye ekleme
     public static void addBook() {
         System.out.println("kitap adı girin: ");
-        String bookName = scan.nextLine().trim();
+        String bookName = ui.getScanner().nextLine().trim();
 
         System.out.println("kitap kategorisi girin: ");
-        Category bookCat = selectCats();
+        Category bookCat = ui.selectCategory();
 
         System.out.println("kitap fiyatı girin(sadece sayı): ");
-        Double bookPrc = scan.nextDouble();
+        Double bookPrc = ui.getScanner().nextDouble();
 
-        scan.nextLine();
+        ui.getScanner().nextLine();
 
         System.out.println("kitap yazar adı girin: ");
-        String bookAut = scan.nextLine().trim();
+        String bookAut = ui.getScanner().nextLine().trim();
 
-        Book book = new Book(Library.getId(Library.getBooks()), bookName, bookCat, bookPrc, bookAut);
+        Book book = new Book(IdGenerator.generateId(BookManager.getInstance().getBooks()), bookName, bookCat, bookPrc, bookAut);
 
         //kütüphaneye ekleme
-        out.println(Library.addBook(book));
+        out.println(BookManager.getInstance().addBook(book));
 
         //kategoriye ekleme
-        book.getCategory().addBook(book);
-    }
-
-    //var olan kategorileri kullanıcıdan alma
-    public static Category selectCats() {
-        String keyboard;
-        catMenu();
-        while (true) {
-            keyboard = scan.nextLine();
-            switch (keyboard) {
-                case "KidsBook" -> {
-                    return kidsBook;
-                }
-                case "Novel" -> {
-                    return novel;
-                }
-                case "TextBook" -> {
-                    return textBook;
-                }
-                case "list" -> catMenu();
-                default -> out.println("Bilinmeyen komut. list yazıp kategori listesini açın");
-
-            }
-
-        }
-    }
-
-    //kategori listesi yazdırma
-    public static void catMenu() {
-        String help = """
-                - KidsBook : çocuk kitabı kategorisine seç.
-                - Novel: Roman kategorisini seç.
-                - TextBook : Çalışma kitabı kategorisini seç.
-                - list : kategori listesini açın.
-                """;
-        out.println(help);
+        CategoryManager.getInstance().addBookToCategory(book, book.getCategory());
     }
 
     public static Book findBookAd() {
         System.out.println("kitap adı girin: ");
-        String bookName = scan.nextLine().trim();
-        Book book = Library.findBook(bookName);
+        String bookName = ui.getScanner().nextLine().trim();
+        Book book = BookManager.getInstance().findBook(bookName);
         if (book != null) {
             out.println(book);
             return book;
@@ -292,10 +215,10 @@ public class Main {
 
     public static void findBookI() {
         System.out.println("kitap id'si girin: ");
-        Long bookId = scan.nextLong();
-        scan.nextLine();
+        Long bookId = ui.getScanner().nextLong();
+        ui.getScanner().nextLine();
 
-        Book book = Library.findBook(bookId);
+        Book book = BookManager.getInstance().findBook(bookId);
         if (book != null) {
             out.println(book);
         } else {
@@ -305,9 +228,9 @@ public class Main {
 
     public static void findBookY() {
         System.out.println("Yazar adı girin: ");
-        String authName = scan.nextLine().trim();
+        String authName = ui.getScanner().nextLine().trim();
 
-        Book book = Library.findBookAuthor(authName);
+        Book book = BookManager.getInstance().findBookByAuthor(authName);
         if (book != null) {
             out.println(book);
         } else {
@@ -316,108 +239,89 @@ public class Main {
     }
 
     public static void updatebook() {
-        updateMenu();
+        ui.updateMenu();
         Book book  = findBookAd();
-        while (!(keyboard = scan.nextLine().trim()).equals("exit")) {
+        while (!(keyboard = ui.getScanner().nextLine().trim()).equals("exit")) {
 
             switch (keyboard) {
                 case "ad" -> {
                     out.println("Yeni isim girin: ");
-                    book.setName(scan.nextLine());
+                    book.setName(ui.getScanner().nextLine());
                     out.println("isim başarıyla değiştirildi");
                 }
                 case "kategori" -> {
-                    Category kat = selectCats();
+                    Category kat = ui.selectCategory();
                     changeCategory(book, kat);
                     out.println("kategori başarıyla değiştirildi");
                 }
                 case "fiyat" -> {
                     System.out.println("kitap fiyatı girin(sadece sayı): ");
-                    Double bookPrc = scan.nextDouble();
-                    scan.nextLine();
+                    Double bookPrc = ui.getScanner().nextDouble();
+                    ui.getScanner().nextLine();
                     book.setPrice(bookPrc);
                     out.println("fiyat başarıyla değiştirildi");
                 }
                 case "yazar" -> {
                     System.out.println("kitap yazar adı girin: ");
-                    String bookAut = scan.nextLine().trim();
+                    String bookAut = ui.getScanner().nextLine().trim();
                     book.setAuthor(bookAut);
                     out.println("yazar adı başarıyla değiştirildi");
                 }
-                case "menu" -> updateMenu();
+                case "menu" -> ui.updateMenu();
                 default -> out.println("Bilinmeyen komut. menu yazıp komutları listeleyin");
             }
         }
         out.println("update menüsünden çıktınız");
     }
 
-    public static void updateMenu() {
-        String menu = """
-                - ad : kitap ismini değiştirir.
-                - kategori: kitap kategorisini değiştirir.
-                - fiyat : kitap fiyatını değiştirir.
-                - yazar : kitap yazar ismini değiştirir.
-                - exit : update menüsünden çıkın.
-                """;
-        out.println(menu);
-    }
-
     public static void changeCategory(Book book, Category kat) {
-        out.println(book.getCategory().deleteBook(book));
+        out.println(CategoryManager.getInstance().removeBookFromCategory(book, book.getCategory()));
         book.setCategory(kat);
-        out.println(book.getCategory().addBook(book));
+        out.println(CategoryManager.getInstance().addBookToCategory(book, kat));
     }
 
     public static void deleteBook(){
         Book book = findBookAd();
-        out.println(Library.deleteBook(book));
+        out.println(BookManager.getInstance().deleteBook(book));
     }
 
     public static void listCat(){
-       Category cat = selectCats();
+       Category cat = ui.selectCategory();
 
-        siralamaMenu();
+        ui.siralamaMenu();
 
         while(true){
-            keyboard = scan.nextLine();
+            keyboard = ui.getScanner().nextLine();
             switch (keyboard){
                 case "düz" -> {
-                    out.println(cat.listBookAsc());
+                    out.println(CategoryManager.getInstance().listBooksInCategoryAsc(cat));
                     return;
                 }
                 case "ters" -> {
-                    out.println(  cat.listBookDesc());
+                    out.println(CategoryManager.getInstance().listBooksInCategoryDesc(cat));
                     return;
                 }
                 default -> {
                     out.println("bilinmeyen komut");
-                    siralamaMenu();
+                    ui.siralamaMenu();
                 }
             }
         }
 
     }
 
-    public static void siralamaMenu() {
-        String menu = """
-                - düz : alfabetik sırala.
-                - ters: alfabeye göre tesr sırala.
-                """;
-        out.println(menu);
-    }
-
     public static  void  listByAuth(){
         out.println("yazar adı girin: ");
-        keyboard = scan.nextLine();
+        keyboard = ui.getScanner().nextLine();
 
-        out.println(Library.listByAuthor(keyboard));
+        out.println(BookManager.getInstance().listByAuthor(keyboard));
     }
 
     public static void lendBook(){
         out.println("okuyucu adı girin");
-        String readerName = scan.nextLine();
+        String readerName = ui.getScanner().nextLine();
 
-        Reader reader = Library.findReader(readerName);
+        Reader reader = ReaderManager.getInstance().findReader(readerName);
         if(reader==null){
             out.println("böyle bir kullanıcı yok");
             return;
@@ -429,14 +333,14 @@ public class Main {
             return;
         }
 
-        out.println(Library.lendBook(book,reader));
+        out.println(LendingManager.getInstance().lendBook(book,reader));
     }
 
     public static  void returnBook(){
         out.println("okuyucu adı girin");
-        String readerName = scan.nextLine();
+        String readerName = ui.getScanner().nextLine();
 
-        Reader reader = Library.findReader(readerName);
+        Reader reader = ReaderManager.getInstance().findReader(readerName);
         if(reader==null){
             out.println("böyle bir kullanıcı yok");
             return;
@@ -448,6 +352,6 @@ public class Main {
             return;
         }
 
-        out.println(Library.returnBook(book,reader));
+        out.println(LendingManager.getInstance().returnBook(book,reader));
     }
 }

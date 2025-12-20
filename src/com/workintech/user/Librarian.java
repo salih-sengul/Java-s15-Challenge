@@ -1,7 +1,5 @@
 package com.workintech.user;
 
-import com.workintech.library.Library;
-
 public class Librarian extends User{
 
     public Librarian(Long id, String userName, String password) {
