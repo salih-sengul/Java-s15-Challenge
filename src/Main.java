@@ -324,8 +324,8 @@ public class Main {
 
     public static void updatebook(Book book) {
         updateMenu();
-        while (!Objects.equals(keyboard, "exit")) {
-            keyboard = scan.nextLine().trim();
+        while (!(keyboard = scan.nextLine().trim()).equals("exit")) {
+
             switch (keyboard) {
                 case "ad" -> {
                     out.println("Yeni isim girin: ");
@@ -354,6 +354,7 @@ public class Main {
                 default -> out.println("Bilinmeyen komut. menu yazıp komutları listeleyin");
             }
         }
+        out.println("update menüsünden çıktınız");
     }
 
     public static void updateMenu() {
@@ -362,6 +363,7 @@ public class Main {
                 - kategori: kitap kategorisini değiştirir.
                 - fiyat : kitap fiyatını değiştirir.
                 - yazar : kitap yazar ismini değiştirir.
+                - exit : update menüsünden çıkın.
                 """;
         out.println(menu);
     }
