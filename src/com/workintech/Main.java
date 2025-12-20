@@ -1,3 +1,5 @@
+package com.workintech;
+
 import com.workintech.book.Book;
 import com.workintech.book.category.Category;
 import com.workintech.book.category.KidsBook;
@@ -12,12 +14,13 @@ import com.workintech.user.User;
 import java.util.*;
 
 import static java.lang.System.out;
-import static java.lang.System.setOut;
 
 public class Main {
     static Scanner scan = new Scanner(System.in);
     static String keyboard;
     static String sessionName;
+    static String noBook = "Böyle bir kitap yok";
+    static String adminStr = "admin";
     static Category kidsBook = new KidsBook(1L, "Kids Book", "2-3");
     static Category novel = new Novel(2L, "Novel", "Horror");
     static Category textBook = new Textbook(3L, "Text Book", "Math");
@@ -63,7 +66,7 @@ public class Main {
 
         System.out.println(session);
 
-        if (session.equalsIgnoreCase("admin")) {
+        if (session.equalsIgnoreCase(adminStr)) {
             helpMenuWithAdmin();
         }
         helpMenu();
@@ -91,8 +94,10 @@ public class Main {
                 case "findBookI" -> findBookI();
                 case "findBookY" -> findBookY();
                 case "updateBook" -> updatebook(findBookAd());
+                case "deleteBook"-> deleteBook();
+                case "listCat" -> listCat();
                 case "help" -> {
-                    if (session.equalsIgnoreCase("admin")) {
+                    if (session.equalsIgnoreCase(adminStr)) {
                         helpMenuWithAdmin();
                     }
                     helpMenu();
@@ -102,6 +107,24 @@ public class Main {
             }
 
         }
+    }
+
+    public static void helpMenu() {
+        String help = """
+                - addBook : Sisteme kitap ekle.
+                - findBookAd : İsim ile kitap ara.
+                - findBookI : ID ile kitap ara.
+                - findBookY : Yazar adı ile kitap ara.
+                - updateBook : Kitap bilgilerini güncelle.
+                - deleteBook : Sistemden kitap sil.
+                - listCat : Kategorideki tüm kitapları listele.
+                - listAut : Yazarın tüm kitaplarını listele.
+                - lendBook : Kullanıcıya kitap ver.
+                - returnBook : Kullanıcıdan kitap al.
+                - help : komutları listele.
+                - exit : Programdan çık.
+                """;
+        out.println(help);
     }
 
     private static void admin(String session) {
@@ -143,24 +166,6 @@ public class Main {
         out.println(help);
     }
 
-    public static void helpMenu() {
-        String help = """
-                - addBook : Sisteme kitap ekle.
-                - findBookAd : İsim ile kitap ara.
-                - findBookI : ID ile kitap ara.
-                - findBookY : Yazar adı ile kitap ara.
-                - updateBook : Kitap bilgilerini güncelle.
-                - deleteBook : Sistemden kitap sil.
-                - listCat : Kategorideki tüm kitapları listele.
-                - listAut : Yazarın tüm kitaplarını listele.
-                - lendBook : Kullanıcıya kitap ver.
-                - returnBook : Kullanıcıdan kitap al.
-                - help : komutları listele.
-                - exit : Programdan çık.
-                """;
-        out.println(help);
-    }
-
     public static void createAdmin() {
         System.out.println("Kullanıcı adı giriniz.");
         String username = scan.nextLine().trim();
@@ -181,13 +186,12 @@ public class Main {
             return;
         }
         for (Map.Entry<Long, User> entry : Library.getUsers().entrySet()) {
-            if (entry.getValue() instanceof Admin) {
-                if (entry.getValue().getUserName().equals(adminName)) {
+            if (entry.getValue() instanceof Admin && entry.getValue().getUserName().equals(adminName)) {
                     Library.getUsers().remove(entry.getValue().getId());
                     System.out.println(adminName + " Kullanıcı adlı admin silindi.");
                     return;
                 }
-            }
+
         }
         System.out.println("Map'te Admin kullanıcı yok");
         System.out.println(adminName + " kullanıcı adlı kullanıcı bulunamadı!");
@@ -212,13 +216,12 @@ public class Main {
         String librarianName = scan.nextLine().trim();
 
         for (Map.Entry<Long, User> entry : Library.getUsers().entrySet()) {
-            if (entry.getValue() instanceof Librarian) {
-                if (entry.getValue().getUserName().equals(librarianName)) {
+            if (entry.getValue() instanceof Librarian && entry.getValue().getUserName().equals(librarianName)) {
                     Library.getUsers().remove(entry.getValue().getId());
                     System.out.println(librarianName + " Kullanıcı adlı kütüphaneci silindi.");
                     return;
                 }
-            }
+
         }
         System.out.println(librarianName + " kullanıcı adlı kullanıcı bulunamadı!");
         System.out.println("Map'te kütüphaneci kullanıcı yok");
@@ -292,7 +295,7 @@ public class Main {
             out.println(book);
             return book;
         } else {
-            out.println("Böyle bir kitap yok");
+            out.println(noBook);
             return null;
         }
     }
@@ -306,7 +309,7 @@ public class Main {
         if (book != null) {
             out.println(book);
         } else {
-            out.println("Böyle bir kitap yok");
+            out.println(noBook);
         }
     }
 
@@ -318,7 +321,7 @@ public class Main {
         if (book != null) {
             out.println(book);
         } else {
-            out.println("Böyle bir kitap yok");
+            out.println(noBook);
         }
     }
 
@@ -374,4 +377,41 @@ public class Main {
         out.println(book.getCategory().addBook(book));
     }
 
+    public static void deleteBook(){
+        Book book = findBookAd();
+        out.println(Library.deleteBook(book));
+    }
+
+    public static void listCat(){
+       Category cat = selectCats();
+
+        siralamaMenu();
+
+        while(true){
+            keyboard = scan.nextLine();
+            switch (keyboard){
+                case "düz" -> {
+                    out.println(cat.listBookAsc());
+                    return;
+                }
+                case "ters" -> {
+                    out.println(  cat.listBookDesc());
+                    return;
+                }
+                default -> {
+                    out.println("bilinmeyen komut");
+                    siralamaMenu();
+                }
+            }
+        }
+
+    }
+
+    public static void siralamaMenu() {
+        String menu = """
+                - düz : alfabetik sırala.
+                - ters: alfabeye göre tesr sırala.
+                """;
+        out.println(menu);
+    }
 }
