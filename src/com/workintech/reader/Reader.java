@@ -53,4 +53,8 @@ public class Reader {
     public Set<Invoice> getInvoices() {
         return invoices;
     }
+
+    public Integer getBookLimit(){
+        return bookLimit;
+    }
 }

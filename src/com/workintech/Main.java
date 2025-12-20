@@ -6,6 +6,7 @@ import com.workintech.book.category.KidsBook;
 import com.workintech.book.category.Novel;
 import com.workintech.book.category.Textbook;
 import com.workintech.library.Library;
+import com.workintech.reader.Reader;
 import com.workintech.user.Admin;
 import com.workintech.user.Athentication;
 import com.workintech.user.Librarian;
@@ -69,22 +70,8 @@ public class Main {
         if (session.equalsIgnoreCase(adminStr)) {
             helpMenuWithAdmin();
         }
-        helpMenu();
 
-        /*
-                    addBook : Sisteme kitap ekle.
-                - findBookAd : İsim ile kitap ara.
-                - findBookI : ID ile kitap ara.
-                - findBookY : Yazar adı ile kitap ara.
-                - updateBook : Kitap bilgilerini güncelle.
-                - deleteBook : Sistemden kitap sil.
-                - listCat : Kategorideki tüm kitapları listele.
-                - listAut : Yazarın tüm kitaplarını listele.
-                - lendBook : Kullanıcıya kitap ver.
-                - returnBook : Kullanıcıdan kitap al.
-                - help : komutları listele.
-                - exit : Admin komutlarından çık.
-        * */
+        helpMenu();
         while (!(keyboard = scan.nextLine()).equals("exit")) {
 
             switch (keyboard) {
@@ -93,9 +80,12 @@ public class Main {
                 case "findBookAd" -> findBookAd();
                 case "findBookI" -> findBookI();
                 case "findBookY" -> findBookY();
-                case "updateBook" -> updatebook(findBookAd());
+                case "updateBook" -> updatebook();
                 case "deleteBook"-> deleteBook();
                 case "listCat" -> listCat();
+                case "listByAuth" -> listByAuth();
+                case "lendBook" -> lendBook();
+                case "returnBook" -> returnBook();
                 case "help" -> {
                     if (session.equalsIgnoreCase(adminStr)) {
                         helpMenuWithAdmin();
@@ -325,8 +315,9 @@ public class Main {
         }
     }
 
-    public static void updatebook(Book book) {
+    public static void updatebook() {
         updateMenu();
+        Book book  = findBookAd();
         while (!(keyboard = scan.nextLine().trim()).equals("exit")) {
 
             switch (keyboard) {
@@ -413,5 +404,50 @@ public class Main {
                 - ters: alfabeye göre tesr sırala.
                 """;
         out.println(menu);
+    }
+
+    public static  void  listByAuth(){
+        out.println("yazar adı girin: ");
+        keyboard = scan.nextLine();
+
+        out.println(Library.listByAuthor(keyboard));
+    }
+
+    public static void lendBook(){
+        out.println("okuyucu adı girin");
+        String readerName = scan.nextLine();
+
+        Reader reader = Library.findReader(readerName);
+        if(reader==null){
+            out.println("böyle bir kullanıcı yok");
+            return;
+        }
+
+        Book book = findBookAd();
+        if(book==null){
+            out.println("böyle bir kullanıcı yok");
+            return;
+        }
+
+        out.println(Library.lendBook(book,reader));
+    }
+
+    public static  void returnBook(){
+        out.println("okuyucu adı girin");
+        String readerName = scan.nextLine();
+
+        Reader reader = Library.findReader(readerName);
+        if(reader==null){
+            out.println("böyle bir kullanıcı yok");
+            return;
+        }
+
+        Book book = findBookAd();
+        if(book==null){
+            out.println("böyle bir kullanıcı yok");
+            return;
+        }
+
+        out.println(Library.returnBook(book,reader));
     }
 }

@@ -9,7 +9,7 @@ public class Book implements Comparable<Book> {
     private Long id;
     private String name;
     private Category category;
-    private Boolean isAvailable;
+    private boolean isAvailable;
     private Double price;
     private String author;
     private Invoice invoice;

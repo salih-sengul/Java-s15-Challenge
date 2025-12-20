@@ -68,7 +68,16 @@ public class Library {
 
     public static Book findBookAuthor(String authorName) {
         for (Map.Entry<Long, Book> entry : books.entrySet()) {
-            if (entry.getValue().getName().equals(authorName)) {
+            if (entry.getValue().getAuthor().equals(authorName)) {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
+
+    public static Reader findReader(String readerName) {
+        for (Map.Entry<Long, Reader> entry : readers.entrySet()) {
+            if (entry.getValue().getName().equals(readerName)) {
                 return entry.getValue();
             }
         }
@@ -76,12 +85,20 @@ public class Library {
     }
 
     public static String lendBook(Book book, Reader reader) {
+        if(book.getAvailable()){
+            return "Kitap müsait değil";
+        }
 
-        if (reader.getBooks().add(book) && book.getAvailable()) {
+        if(reader.getBooks().size()>=reader.getBookLimit()){
+            return "Kullanıcı " + reader.getBookLimit() + " kitap limitini aştı";
+        }
+
+        if (reader.getBooks().add(book)) {
             book.setAvailable(false);
 
-            Invoice invoice = new Invoice(book.getId(), book.getId(), book.getPrice());
+            Invoice invoice = new Invoice(getId(invoices), book.getId(), book.getPrice());
             invoices.put(invoice.getId(), invoice);
+
             book.setInvoice(invoice);
             reader.getInvoices().add(invoice);
 
@@ -114,9 +131,10 @@ public class Library {
         return Collections.max(map.keySet()) + 1;
     }
 
-    public static List<Book> listByCategory(Category category) {
+    //kategori içindeki metodu kullandık.
+    /*public static List<Book> listByCategory(Category category) {
         return category.listBookAsc().stream().toList();
-    }
+    }*/
 
     public static List<Book> listByAuthor(String authorName) {
         List<Book> bookList = new ArrayList<>();
