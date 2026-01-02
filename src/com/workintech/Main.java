@@ -26,6 +26,7 @@ public class Main {
     static Category novel = new Novel(2L, "Novel", "Horror");
     static Category textBook = new Textbook(3L, "Text Book", "Math");
     static Book kitap = new Book(1L, "al", kidsBook, 10d, "yaz");
+    static Reader reader = new Reader(Library.getId(Library.getReaders()),"ayşe","05417805555");
 
 
     public static void main(String[] args) {
@@ -34,6 +35,7 @@ public class Main {
         Library.getCategories().put(3L, textBook);
         kitap.getCategory().addBook(kitap);
         Library.addBook(kitap);
+        Library.getReaders().put(reader.getId(),reader);
 
         Admin admin = new Admin(1L, "ali", "123");
 

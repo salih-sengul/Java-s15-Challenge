@@ -77,7 +77,7 @@ public class Library {
 
     public static Reader findReader(String readerName) {
         for (Map.Entry<Long, Reader> entry : readers.entrySet()) {
-            if (entry.getValue().getName().equals(readerName)) {
+            if (entry.getValue().getName().toLowerCase(Locale.ROOT).equals(readerName.toLowerCase(Locale.ROOT))) {
                 return entry.getValue();
             }
         }
@@ -85,7 +85,7 @@ public class Library {
     }
 
     public static String lendBook(Book book, Reader reader) {
-        if(book.getAvailable()){
+        if(!book.getAvailable()){
             return "Kitap müsait değil";
         }
 
